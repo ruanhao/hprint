@@ -3,12 +3,13 @@ from setuptools import setup
 
 config = {
     'name': 'hprint',
+    'url': 'https://github.com/ruanhao/hprint',
     'license': 'MIT',
     'description': 'Print python object in table/json format',
     'author' : 'Hao Ruan',
     'author_email': 'ruanhao1116@gmail.com',
     'keywords': ['utils', 'print', 'json'],
-    'version': '1.0',
+    'version': '1.0.1',
     'packages': ['hprint'],
     'install_requires': [
         'tabulate',
