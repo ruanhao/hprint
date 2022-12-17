@@ -16,15 +16,15 @@ __all__ = ['pretty_print', 'hprint']
 
 
 def _pprint(obj):
-    print(pformat(obj, indent=4))
+    _print(pformat(obj, indent=4))
 
 
 def json_print(data):
     if isinstance(data, dict):
-        print(json.dumps(data, indent=4, sort_keys=True))
+        _print(json.dumps(data, indent=4, sort_keys=True))
     elif isinstance(data, list):
         try:
-            print(json.dumps([dict(d) for d in data], indent=4, sort_keys=True))
+            _print(json.dumps([dict(d) for d in data], indent=4, sort_keys=True))
         except Exception:
             _pprint([dict(d) for d in data])
     else:
@@ -66,7 +66,7 @@ def tabulate_numbered_print(data, mappings, offset=0):
             else:
                 attrs.append(_get(item, k))
         tabdata.append(attrs)
-    print(tabulate(tabdata, headers=headers))
+    _print(tabulate(tabdata, headers=headers))
 
 
 def _len(x):
@@ -79,9 +79,9 @@ def x_print(records, headers, offset=0, header=True):
     right_max_len = max(_len(max(record, key=_len)) for record in records) + 1
     for i, record in enumerate(records, 1 + offset):
         if header:
-            print(f'-[ RECORD {i} ]'.ljust(left_max_len, '-') + '+' + '-' * right_max_len)
+            _print(f'-[ RECORD {i} ]'.ljust(left_max_len, '-') + '+' + '-' * right_max_len)
         for j, v in enumerate(record):
-            print(f'{headers[j]}'.ljust(left_max_len) + '| ' + str(v).ljust(right_max_len))
+            _print(f'{headers[j]}'.ljust(left_max_len) + '| ' + str(v).ljust(right_max_len))
 
 
 def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf='simple'):
@@ -112,7 +112,7 @@ def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf
         output = tabulate(tabdata, headers=headers if header else (), tablefmt=tf)
         if raw:
             return output
-        print(output)
+        _print(output)
 
 
 def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, offset=0, numbered=False, missing_value='n/a', tf='simple', header=True, raw=False):
