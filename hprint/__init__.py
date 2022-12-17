@@ -47,7 +47,7 @@ def _get(obj, key, default='n/a'):
     return _chain_get(obj, key, default)
 
 
-def tabulate_numbered_print(data, mappings):
+def tabulate_numbered_print(data, mappings, offset=0):
     if not data:
         return
     if not mappings:
@@ -55,7 +55,7 @@ def tabulate_numbered_print(data, mappings):
     mappings = {'No': '_no', **mappings}
     headers = mappings.keys()
     tabdata = []
-    for idx, item in enumerate(data, start=1):
+    for idx, item in enumerate(data, start=1 + offset):
         attrs = []
         item['_no'] = idx
         for h in headers:
@@ -73,17 +73,18 @@ def _len(x):
     return min(len(str(x)), HPRINT_WRAP)
 
 
-def x_print(records, headers):
+def x_print(records, headers, offset=0, header=True):
     headers = list(headers)
     left_max_len = max(len(max(headers, key=len)), len(f"-[ RECORD {len(records)} ]-")) + 1
     right_max_len = max(_len(max(record, key=_len)) for record in records) + 1
-    for i, record in enumerate(records, 1):
-        print(f'-[ RECORD {i} ]'.ljust(left_max_len, '-') + '+' + '-' * right_max_len)
+    for i, record in enumerate(records, 1 + offset):
+        if header:
+            print(f'-[ RECORD {i} ]'.ljust(left_max_len, '-') + '+' + '-' * right_max_len)
         for j, v in enumerate(record):
             print(f'{headers[j]}'.ljust(left_max_len) + '| ' + str(v).ljust(right_max_len))
 
 
-def tabulate_print(data, mappings, x=False):
+def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf='simple'):
     if not data:
         return
     if not mappings:
@@ -106,12 +107,15 @@ def tabulate_print(data, mappings, x=False):
                 attrs.append(_get(item, k))
         tabdata.append(attrs)
     if x:
-        x_print(tabdata, headers)
+        x_print(tabdata, headers, offset=offset, header=header)
     else:
-        print(tabulate(tabdata, headers=headers))
+        output = tabulate(tabdata, headers=headers if header else (), tablefmt=tf)
+        if raw:
+            return output
+        print(output)
 
 
-def hprint(data, as_json=False, mappings=None, x=False, numbered=False, missing_value='n/a'):
+def hprint(data, as_json=False, mappings=None, x=False, offset=0, numbered=False, missing_value='n/a', tf='simple', header=True, raw=False):
     if not data:
         return
     global _get
@@ -121,9 +125,9 @@ def hprint(data, as_json=False, mappings=None, x=False, numbered=False, missing_
         if as_json:
             json_print(data)
         elif not x and numbered:
-            tabulate_numbered_print(data, mappings)
+            tabulate_numbered_print(data, mappings, offset=offset)
         else:
-            tabulate_print(data, mappings, x)
+            return tabulate_print(data, mappings=mappings, x=x, offset=offset, header=header, raw=raw, tf=tf)
     except Exception:
         if HPRINT_DEBUG:
             traceback.print_exc()
