@@ -115,7 +115,8 @@ def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf
         print(output)
 
 
-def hprint(data, as_json=False, mappings=None, x=False, offset=0, numbered=False, missing_value='n/a', tf='simple', header=True, raw=False):
+def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, offset=0, numbered=False, missing_value='n/a', tf='simple', header=True, raw=False):
+    as_json = as_json or json_format
     if not data:
         return
     global _get
@@ -131,6 +132,7 @@ def hprint(data, as_json=False, mappings=None, x=False, offset=0, numbered=False
     except Exception:
         if HPRINT_DEBUG:
             traceback.print_exc()
+
         json_print(data)
     finally:
         _get = _get0
