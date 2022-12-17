@@ -1,15 +1,22 @@
 # setup.py
 from setuptools import setup
+from pathlib import Path
+
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 config = {
     'name': 'hprint',
     'url': 'https://github.com/ruanhao/hprint',
     'license': 'MIT',
+    "long_description": long_description,
+    "long_description_content_type": 'text/markdown',
     'description': 'Print python object in table/json format',
     'author' : 'Hao Ruan',
     'author_email': 'ruanhao1116@gmail.com',
     'keywords': ['utils', 'print', 'json'],
-    'version': '1.0.1',
+    'version': '1.0.3',
     'packages': ['hprint'],
     'install_requires': [
         'tabulate',
