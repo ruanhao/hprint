@@ -81,6 +81,16 @@ Jane Doe     20
 John Doe  18
 Jane Doe  20
 --------  --
+>>> pretty_print(data, mappings={'NAME': ('name', lambda n: n.upper()), 'AGE': 'age'})
+NAME        AGE
+--------  -----
+JOHN DOE     18
+JANE DOE     20
+>>> pretty_print(data, mappings={'Aggregate': ('', lambda person: person['name'] + ": " + str(person['age']))})
+Aggregate
+------------
+John Doe: 18
+Jane Doe: 20
 >>> pretty_print(data, mappings={'NAME': 'name', 'AGE': 'age'}, header=False, x=True)
 NAME           | John Doe
 AGE            | 18
