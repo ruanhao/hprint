@@ -4,13 +4,15 @@ import json
 from pprint import pformat
 import os
 import traceback
+import logging
 
 _print = partial(print, flush=True)
 
 HPRINT_WRAP = os.getenv("HPRINT_WRAP", 50)
 
-HPRINT_DEBUG = os.getenv("HPRINT_DEBUG")
+logger = logging.getLogger(__name__)
 
+HPRINT_DEBUG = os.getenv("HPRINT_DEBUG")
 
 __all__ = ['pretty_print', 'hprint']
 
@@ -73,6 +75,13 @@ def _len(x):
     return min(len(str(x)), HPRINT_WRAP)
 
 
+def _indent(s: str, indent_cols, max_cols):
+    lines = s.splitlines()
+    if len(lines) <= 1:
+        return s.ljust(max_cols)
+    return lines[0] + '\n' + '\n'.join([(' ' * indent_cols + "| " + line) for line in lines[1:]])
+
+
 def x_print(records, headers, offset=0, header=True):
     headers = list(headers)
     left_max_len = max(len(max(headers, key=len)), len(f"-[ RECORD {len(records)} ]-")) + 1
@@ -81,7 +90,8 @@ def x_print(records, headers, offset=0, header=True):
         if header:
             _print(f'-[ RECORD {i} ]'.ljust(left_max_len, '-') + '+' + '-' * right_max_len)
         for j, v in enumerate(record):
-            _print(f'{headers[j]}'.ljust(left_max_len) + '| ' + str(v).ljust(right_max_len))
+            # _print(f'{headers[j]}'.ljust(left_max_len) + '| ' + str(v).ljust(right_max_len))
+            _print(f'{headers[j]}'.ljust(left_max_len) + '| ' + _indent(str(v), left_max_len, right_max_len))
 
 
 def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf='simple'):
@@ -130,10 +140,9 @@ def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, of
         else:
             return tabulate_print(data, mappings=mappings, x=x, offset=offset, header=header, raw=raw, tf=tf)
     except Exception:
-        if HPRINT_DEBUG:
-            traceback.print_exc()
-
         json_print(data)
+        if HPRINT_DEBUG or logger.isEnabledFor(logging.DEBUG):
+            traceback.print_exc()
     finally:
         _get = _get0
 
