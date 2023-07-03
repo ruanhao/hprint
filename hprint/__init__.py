@@ -24,10 +24,10 @@ def _pprint(obj):
 
 def json_print(data):
     if isinstance(data, dict):
-        _print(json.dumps(data, indent=4, sort_keys=True))
+        _print(json.dumps(data, indent=4, sort_keys=True, default=str))
     elif isinstance(data, list):
         try:
-            _print(json.dumps([dict(d) for d in data], indent=4, sort_keys=True))
+            _print(json.dumps([dict(d) for d in data], indent=4, sort_keys=True), default=str)
         except Exception:
             try:
                 _pprint([dict(d) for d in data])
