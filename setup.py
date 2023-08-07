@@ -16,7 +16,7 @@ config = {
     'author' : 'Hao Ruan',
     'author_email': 'ruanhao1116@gmail.com',
     'keywords': ['utils', 'print', 'json'],
-    'version': '2.0.6',
+    'version': '2.0.7',
     'packages': ['hprint'],
     'install_requires': [
         'tabulate',
