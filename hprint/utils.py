@@ -9,3 +9,13 @@ def install_print_with_flush():
 
     setattr(builtins, 'print0', print)
     setattr(builtins, 'print', partial(print, flush=True))
+
+
+def chain_get(data, chain, default=None):
+    attrs = chain.split('.')
+    if len(attrs) == 1:
+        return data.get(attrs[0], default)
+    result = data
+    for attr in attrs[:-1]:
+        result = result.get(attr, {})
+    return result.get(attrs[-1], default)
