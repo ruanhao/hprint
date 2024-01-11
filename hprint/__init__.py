@@ -19,6 +19,10 @@ HPRINT_DEBUG = os.getenv("HPRINT_DEBUG")
 __all__ = ['pretty_print', 'hprint']
 
 
+def _no_convertion_func(x):
+    return x
+
+
 def _pprint(obj):
     _print(pformat(obj, indent=4))
 
@@ -47,7 +51,7 @@ def _get(obj, key, default='[none]'):
     return result
 
 
-def tabulate_numbered_print(data, mappings, offset=0):
+def tabulate_numbered_print(data, mappings, offset=0, convert=True):
     if not data:
         return
     if not mappings:
@@ -62,6 +66,8 @@ def tabulate_numbered_print(data, mappings, offset=0):
             k = mappings[h]
             if isinstance(k, tuple):
                 (k0, func) = k
+                if not convert:
+                    func = _no_convertion_func
                 attrs.append(func(_get(item, k0)))
             else:
                 attrs.append(_get(item, k))
@@ -98,7 +104,7 @@ def x_print(records, headers, offset=0, header=True):
     return os.linesep.join(output)
 
 
-def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf='simple'):
+def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf='simple', convert=True):
     if not data:
         return
     if not mappings:
@@ -119,6 +125,8 @@ def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf
             k = mappings[h]
             if isinstance(k, tuple):
                 (k0, func) = k
+                if not convert:
+                    func = _no_convertion_func
                 attrs.append(func(_get(item, k0)))
             else:
                 attrs.append(_get(item, k))
@@ -132,7 +140,7 @@ def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf
     _print(output)
 
 
-def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, offset=0, numbered=False, missing_value='[none]', tf='simple', header=True, raw=False):
+def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, offset=0, numbered=False, missing_value='[none]', tf='simple', header=True, raw=False, convert=True):
     as_json = as_json or json_format
     if not data:
         return
@@ -145,9 +153,9 @@ def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, of
                 return data
             json_print(data)
         elif not x and numbered:
-            tabulate_numbered_print(data, mappings, offset=offset)
+            tabulate_numbered_print(data, mappings, offset=offset, convert=convert)
         else:
-            return tabulate_print(data, mappings=mappings, x=x, offset=offset, header=header, raw=raw, tf=tf)
+            return tabulate_print(data, mappings=mappings, x=x, offset=offset, header=header, raw=raw, tf=tf, convert=convert)
     except Exception:
         json_print(data)
         if HPRINT_DEBUG or logger.isEnabledFor(logging.DEBUG):
