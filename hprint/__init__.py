@@ -8,6 +8,8 @@ import logging
 import textwrap
 from .utils import chain_get
 
+_MISSING_VALUE = '[none]'
+
 _print = partial(print, flush=True)
 
 HPRINT_WRAP = int(os.getenv("HPRINT_WRAP", 50))
@@ -42,16 +44,13 @@ def json_print(data):
         _pprint(data)
 
 
-def _get(obj, key, default='[none]'):
+def _get(obj, key):
     if not key:
         return obj
-    result = chain_get(obj, key, default)
-    if result is None:
-        return default
-    return result
+    return chain_get(obj, key)
 
 
-def tabulate_numbered_print(data, mappings, offset=0, convert=True):
+def tabulate_numbered_print(data, mappings, offset=0, convert=True, missing_value=_MISSING_VALUE):
     if not data:
         return
     if not mappings:
@@ -64,13 +63,19 @@ def tabulate_numbered_print(data, mappings, offset=0, convert=True):
         item['_no'] = idx
         for h in headers:
             k = mappings[h]
-            if isinstance(k, tuple):
-                (k0, func) = k
+            if isinstance(k, (tuple, list)):
+                if len(k) == 2:
+                    default = None
+                    (k0, func) = k
+                elif len(k) == 3:
+                    (k0, default, func) = k
+                else:
+                    raise ValueError(f"Invalid mapping {k}")
                 if not convert:
                     func = _no_convertion_func
-                attrs.append(func(_get(item, k0)))
+                attrs.append(func(_get(item, k0) or default))
             else:
-                attrs.append(_get(item, k))
+                attrs.append(_get(item, k) or missing_value)
         tabdata.append(attrs)
     _print(tabulate(tabdata, headers=headers))
 
@@ -104,32 +109,33 @@ def x_print(records, headers, offset=0, header=True):
     return os.linesep.join(output)
 
 
-def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf='simple', convert=True):
+def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf='simple', convert=True, missing_value=_MISSING_VALUE):
     if not data:
         return
     if not mappings:
         mappings = {}
-        # keys = set()
         for entry in data:
-            # keys = keys.union(entry.keys())
             for k in entry.keys():
                 mappings[k] = k
-        # mappings = {k: k for k in keys}
-        # entry_with_most_keys = max(data, key=len)
-        # mappings = {k: k for k in entry_with_most_keys.keys()}
     headers = mappings.keys()
     tabdata = []
     for item in data:
         attrs = []
         for h in headers:
             k = mappings[h]
-            if isinstance(k, tuple):
-                (k0, func) = k
+            if isinstance(k, (tuple, list)):
+                if len(k) == 2:
+                    default = None
+                    (k0, func) = k
+                elif len(k) == 3:
+                    (k0, default, func) = k
+                else:
+                    raise ValueError(f"Invalid mapping {k}")
                 if not convert:
                     func = _no_convertion_func
-                attrs.append(func(_get(item, k0)))
+                attrs.append(func(_get(item, k0) or default))
             else:
-                attrs.append(_get(item, k))
+                attrs.append(_get(item, k) or missing_value)
         tabdata.append(attrs)
     if x:
         output = x_print(tabdata, headers, offset=offset, header=header)
@@ -140,28 +146,23 @@ def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf
     _print(output)
 
 
-def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, offset=0, numbered=False, missing_value='[none]', tf='simple', header=True, raw=False, convert=True):
+def hprint(data, *, mappings=None, json_format=False, as_json=False, x=False, offset=0, numbered=False, missing_value=_MISSING_VALUE, tf='simple', header=True, raw=False, convert=True):
     as_json = as_json or json_format
     if not data:
         return
-    global _get
-    _get0 = _get
-    _get = partial(_get, default=missing_value)
     try:
         if as_json:
             if raw:
                 return data
             json_print(data)
         elif not x and numbered:
-            tabulate_numbered_print(data, mappings, offset=offset, convert=convert)
+            tabulate_numbered_print(data, mappings, offset=offset, convert=convert, missing_value=missing_value)
         else:
-            return tabulate_print(data, mappings=mappings, x=x, offset=offset, header=header, raw=raw, tf=tf, convert=convert)
+            return tabulate_print(data, mappings=mappings, x=x, offset=offset, header=header, raw=raw, tf=tf, convert=convert, missing_value=missing_value)
     except Exception:
         json_print(data)
         if HPRINT_DEBUG or logger.isEnabledFor(logging.DEBUG):
             traceback.print_exc()
-    finally:
-        _get = _get0
 
 
 pretty_print = hprint
