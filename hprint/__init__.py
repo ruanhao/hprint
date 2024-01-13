@@ -21,6 +21,10 @@ HPRINT_DEBUG = os.getenv("HPRINT_DEBUG")
 __all__ = ['pretty_print', 'hprint']
 
 
+def _if_null(x, default):
+    return default if x is None else x
+
+
 def _no_convertion_func(x):
     return x
 
@@ -73,9 +77,9 @@ def tabulate_numbered_print(data, mappings, offset=0, convert=True, missing_valu
                     raise ValueError(f"Invalid mapping {k}")
                 if not convert:
                     func = _no_convertion_func
-                attrs.append(func(_get(item, k0) or default))
+                attrs.append(func(_if_null(_get(item, k0), default)))
             else:
-                attrs.append(_get(item, k) or missing_value)
+                attrs.append(_if_null(_get(item, k), missing_value))
         tabdata.append(attrs)
     _print(tabulate(tabdata, headers=headers))
 
@@ -133,9 +137,9 @@ def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf
                     raise ValueError(f"Invalid mapping {k}")
                 if not convert:
                     func = _no_convertion_func
-                attrs.append(func(_get(item, k0) or default))
+                attrs.append(func(_if_null(_get(item, k0), default)))
             else:
-                attrs.append(_get(item, k) or missing_value)
+                attrs.append(_if_null(_get(item, k), missing_value))
         tabdata.append(attrs)
     if x:
         output = x_print(tabdata, headers, offset=offset, header=header)
