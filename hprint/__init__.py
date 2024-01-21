@@ -81,7 +81,7 @@ def tabulate_numbered_print(data, mappings, offset=0, convert=True, missing_valu
             else:
                 attrs.append(_if_null(_get(item, k), missing_value))
         tabdata.append(attrs)
-    _print(tabulate(tabdata, headers=headers))
+    _print(tabulate(tabdata, headers=headers, floatfmt='', intfmt=''))
 
 
 def _len(x):
@@ -144,7 +144,7 @@ def tabulate_print(data, mappings, x=False, offset=0, header=True, raw=False, tf
     if x:
         output = x_print(tabdata, headers, offset=offset, header=header)
     else:
-        output = tabulate(tabdata, headers=headers if header else (), tablefmt=tf)
+        output = tabulate(tabdata, headers=headers if header else (), tablefmt=tf, floatfmt='', intfmt='')
     if raw:
         return output
     _print(output)
