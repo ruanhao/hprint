@@ -18,4 +18,6 @@ def chain_get(data, chain, default=None):
     result = data
     for attr in attrs[:-1]:
         result = result.get(attr, {})
+        if result is None:
+            return default
     return result.get(attrs[-1], default)
